@@ -10,6 +10,8 @@
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 class Student(object):
     """A student from the flu survey data set with the following properties:
@@ -213,7 +215,7 @@ def gradientDescentMultiVar(theta0, alpha, trainingData, maxIterations):
         theta[1] = theta[1] - alpha * (1.0 / len(trainingData)) * errorSum1
         theta[2] = theta[2] - alpha * (1.0 / len(trainingData)) * errorSum2
 
-        currentCost = costFunctionLinear(theta, trainingData)
+        currentCost = costFunctionMultiVar(theta, trainingData)
 
         iterations.append(i)
 
@@ -233,9 +235,9 @@ def gradientDescentMultiVar(theta0, alpha, trainingData, maxIterations):
 
 
 ####### GLOBAL VARIABLES #######
-alpha = 0.4
-thetaInit = [2,2]
-trainingPercentage = 0.2
+alpha = 0.01
+thetaInit = [0,0]
+trainingPercentage = 0.8
 
 
 ####### IMPORT DATA FROM EXCEL INTO PANDAS DATAFRAME #######
@@ -280,12 +282,13 @@ print("\n\n\n")
 ####### DUMMY DATASET TO EXPERIMENT WITH #######
 dummyStudents = []
 for i in range(5):
-    dummyStudents.append(Student(i,i,i+1))
+    dummyStudents.append(Student(i,i,i))
 
 '''
 thetaFinal = gradientDescentLinear(thetaInit, alpha, dummyStudents, 10000)
 print("Theta Final: ", thetaFinal)
 '''
+
 
 ####### LINEAR REGRESSION WITH ONE VARIABLE #######
 print("######## TESTING LINEAR MODEL #######")
@@ -294,7 +297,17 @@ print('Iterations Needed for Convergence: ', iterations)
 print('Theta Final:', thetaFinal)
 predictionError = costFunctionLinear(thetaFinal, testData)
 print('Prediciton Error:', predictionError)
+plt.plot(data['KnowlTrans'],data['Risk'], 'o')
+bestfit = []
+for point in data['KnowlTrans']:
+    bestfit.append(thetaFinal[0]+thetaFinal[1]*point)
+plt.plot(data['KnowlTrans'],bestfit)
+plt.ylabel('Risk')
+plt.xlabel('Knowledge of Transmission')
+plt.show()
 print("\n\n\n")
+
+
 
 ####### QUADRATIC REGRESSION WITH ONE VARIABLE #######
 print("####### TESTING QUADRATIC MODEL #######")
@@ -304,18 +317,34 @@ print('Iterations Needed for Convergence: ', iterations)
 print('Theta Final: ', thetaFinal)
 predictionError = costFunctionQuadratic(thetaFinal, testData)
 print('Prediction Error: ', predictionError)
+plt.plot(data['KnowlTrans'],data['Risk'], 'o')
+bestfitquad = []
+for point in data['KnowlTrans']:
+    bestfitquad.append(thetaFinal[0]+thetaFinal[1]*point + thetaFinal[2]*point**2)
+plt.plot(data['KnowlTrans'],bestfitquad)
+plt.ylabel('Risk')
+plt.xlabel('Knowledge of Transmission')
+plt.show()
 print("\n\n\n")
+
+
 
 ####### MULTI-VARIABLE LINEAR REGRESSION #######
 print("####### TESTING MULTI_VARIABLE LINEAR REGRESSION #######")
 theta = [0,0,0]
-thetaFinal, iterations = gradientDescentMultiVar(theta, alpha, dummyStudents, 100000)
+thetaFinal, iterations = gradientDescentMultiVar(theta, alpha, trainingData, 100000)
 print('Iterations Needed for Convergence: ', iterations)
 print('Theta Final: ', thetaFinal)
 predictionError = costFunctionMultiVar(thetaFinal, testData)
 print('Prediction Error: ', predictionError)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(data['KnowlTrans'], data['RespEtiq'], data['Risk'])
+ax.plot(data['KnowlTrans'], data['RespEtiq'], thetaFinal[0] + thetaFinal[1]*data['KnowlTrans'] + thetaFinal[2]*data['RespEtiq'])
+ax.set_ylabel('Respritory Etiquette')
+ax.set_xlabel('Knowledge of Transmission')
+ax.set_zlabel('Risk')
+plt.show()
 print("\n\n\n")
 
-
-######## VISUALIZATIONS ########
 
